@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import {ClangdContext} from './clangd-context';
+import {getCompilationProfiles} from './compilation-profiles';
 
 /**
  *  This method is called when the extension is activated. The extension is
@@ -27,6 +28,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const shouldCheck = vscode.workspace.getConfiguration('clangd').get(
       'detectExtensionConflicts');
+
+  await getCompilationProfiles(context, clangdContext);
+
   if (shouldCheck) {
     const interval = setInterval(function() {
       const cppTools = vscode.extensions.getExtension('ms-vscode.cpptools');

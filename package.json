@@ -1,6 +1,6 @@
 {
-    "name": "vscode-clangd",
-    "displayName": "clangd",
+    "name": "sudu-vscode-clangd",
+    "displayName": "sudu-clangd",
     "description": "C/C++ completion, navigation, and insights",
     "version": "0.1.23",
     "publisher": "llvm-vs-code-extensions",

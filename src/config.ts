@@ -24,6 +24,7 @@ function substitute<T>(val: T): T {
   else if (typeof val === 'object') {
     // Substitute values but not keys, so we don't deal with collisions.
     const result = {} as {[k: string]: any};
+    // @ts-ignore
     for (let [k, v] of Object.entries(val))
       result[k] = substitute(v);
     val = result as T;
