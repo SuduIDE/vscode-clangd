@@ -79,6 +79,9 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
               'workspace/didChangeConfiguration',
               {settings: {compilationProfile: newProfile.label}});
           }
+
+          await clangdContext.client.restart();
+
           await extensionContext.workspaceState.update(COMPILATION_PROFILE_KEY, newProfile?.label);
           statusBarItem.text = `Compilation profile: ${newProfile?.label}`
         });
