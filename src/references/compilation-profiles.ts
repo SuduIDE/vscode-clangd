@@ -94,6 +94,8 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
 
           const textDocument = vscode.window.activeTextEditor.document
           const position = vscode.window.activeTextEditor.selection.active;
+          const searchItem = textDocument.getText(textDocument.getWordRangeAtPosition(position));
+
           const profiles =
             cppConfiguration
               ? cppConfiguration.compilationProfiles.map(
@@ -115,7 +117,7 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
               }
             });
 
-            window.registerTreeDataProvider('references-in-profiles.tree', new ReferencesTreeData(locationsWithProfile));
+            window.registerTreeDataProvider('references-in-profiles.tree', new ReferencesTreeData(locationsWithProfile, searchItem));
             commands.executeCommand('setContext', 'references-in-profiles.isActive', true);
             commands.executeCommand(`references-in-profiles.tree.focus`);
           })
