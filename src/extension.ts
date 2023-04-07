@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import {ClangdContext} from './clangd-context';
-import {getCompilationProfiles} from './compilation-profiles';
+import {getCompilationProfiles} from './references/compilation-profiles';
 
 /**
  *  This method is called when the extension is activated. The extension is

@@ -252,6 +252,11 @@
                 "category": "clangd",
                 "title": "Toggle inlay hints",
                 "enablement": "clangd.inlayHints.supported"
+            },
+            {
+                "command": "sudu.clangd.referencesInAllProfiles",
+                "category": "clangd",
+                "title": "Find All References in All Profiles"
             }
         ],
         "keybindings": [
@@ -283,6 +288,11 @@
                 {
                     "command": "clangd.ast",
                     "when": "clangd.ast.supported"
+                },
+                {
+                    "command": "sudu.clangd.referencesInAllProfiles",
+                    "when": "resourceLangId == cpp && editorHasReferenceProvider",
+                    "group": "0_navigation@1"
                 }
             ],
             "view/title": [
@@ -332,6 +342,15 @@
                 }
             ]
         },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "references-in-profiles-view",
+                    "icon": "$(references)",
+                    "title": "References in profiles"
+                }
+            ]
+        },
         "views": {
             "explorer": [
                 {
@@ -348,6 +367,13 @@
                     "id": "clangd.ast",
                     "name": "AST",
                     "when": "clangd.ast.hasData"
+                }
+            ],
+            "references-in-profiles-view": [
+                {
+                    "id": "references-in-profiles.tree",
+                    "name": "References in All Profiles",
+                    "when": "references-in-profiles.isActive"
                 }
             ]
         }
