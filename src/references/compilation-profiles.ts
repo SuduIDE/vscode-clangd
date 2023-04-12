@@ -9,7 +9,9 @@ import {
   workspace
 } from 'vscode';
 import {Location} from 'vscode-languageserver-protocol';
-
+import {
+  DidChangeConfigurationNotification
+} from 'vscode-languageclient';
 import {ClangdContext} from '../clangd-context';
 import {ReferencesTreeData} from "./references-tree-data";
 
@@ -52,8 +54,7 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
       const cppConfiguration =
         configuration.configurations.find(conf => conf.language === 'c++');
 
-      let currentProfile =
-        extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY);
+      let currentProfile = extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY);
 
       if (cppConfiguration) {
         if (!currentProfile) {
@@ -66,6 +67,13 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
         statusBarItem.text = `Compilation profile: ${currentProfile}`;
         statusBarItem.show();
 
+        if (currentProfile) {
+          await clangdContext.client.sendNotification(
+            DidChangeConfigurationNotification.type,
+            {settings: {compilationProfile: currentProfile}}
+          );
+        }
+
         commands.registerCommand('cpp.compilation-profiles.show', async () => {
           const options: QuickPickItem[] =
             cppConfiguration.compilationProfiles.map(
@@ -74,16 +82,15 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
           const newProfile = await window.showQuickPick(
             options, {title: 'Choose new compilation profile'});
 
-          if (newProfile) {
+          if (newProfile && newProfile.label !== extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY)) {
             await clangdContext.client.sendNotification(
-              'workspace/didChangeConfiguration',
-              {settings: {compilationProfile: newProfile.label}});
+              DidChangeConfigurationNotification.type,
+              {settings: {compilationProfile: newProfile.label}}
+            );
+
+            await extensionContext.workspaceState.update(COMPILATION_PROFILE_KEY, newProfile?.label);
+            statusBarItem.text = `Compilation profile: ${newProfile?.label}`;
           }
-
-          await clangdContext.client.restart();
-
-          await extensionContext.workspaceState.update(COMPILATION_PROFILE_KEY, newProfile?.label);
-          statusBarItem.text = `Compilation profile: ${newProfile?.label}`
         });
 
         statusBarItem.command = 'cpp.compilation-profiles.show';
@@ -105,7 +112,10 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
                 profile => profile.name)
               : [];
 
-          window.withProgress({location: { viewId: 'references-in-profiles.tree' }, title: 'Finding references'}, async () => {
+          window.withProgress({
+            location: {viewId: 'references-in-profiles.tree'},
+            title: 'Finding references'
+          }, async () => {
             const locationsWithProfile = (await clangdContext.client.sendRequest<LspLocationWithProfiles[]>(
               'textDocument/referencesAll',
               {
