@@ -12,12 +12,19 @@ import * as openConfig from './open-config';
 import * as switchSourceHeader from './switch-source-header';
 import * as typeHierarchy from './type-hierarchy';
 
+const DVFS_SCHEME = 'sudu';
+
 export const clangdDocumentSelector = [
   {scheme: 'file', language: 'c'},
   {scheme: 'file', language: 'cpp'},
   {scheme: 'file', language: 'cuda-cpp'},
   {scheme: 'file', language: 'objective-c'},
   {scheme: 'file', language: 'objective-cpp'},
+  {scheme: DVFS_SCHEME, language: 'c'},
+  {scheme: DVFS_SCHEME, language: 'cpp'},
+  {scheme: DVFS_SCHEME, language: 'cuda-cpp'},
+  {scheme: DVFS_SCHEME, language: 'objective-c'},
+  {scheme: DVFS_SCHEME, language: 'objective-cpp'},
 ];
 
 export function isClangdDocument(document: vscode.TextDocument) {
@@ -65,10 +72,18 @@ export class ClangdContext implements vscode.Disposable {
     if (!clangdPath)
       return;
 
+
+    const rootPath = vscode.workspace.workspaceFolders?.[0].uri?.path;
+    const rootScheme = vscode.workspace.workspaceFolders?.[0].uri?.scheme;
+
+     const cwd = rootScheme === DVFS_SCHEME  ?
+       process.cwd() :
+       rootPath || process.cwd();
+
     const clangd: vscodelc.Executable = {
       command: clangdPath,
       args: await config.get<string[]>('arguments'),
-      options: {cwd: vscode.workspace.rootPath || process.cwd()}
+      options: { cwd }
     };
     const traceFile = config.get<string>('trace');
     if (!!traceFile) {
