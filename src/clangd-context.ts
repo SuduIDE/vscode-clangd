@@ -73,12 +73,11 @@ export class ClangdContext implements vscode.Disposable {
       return;
 
 
-    const rootPath = vscode.workspace.workspaceFolders?.[0].uri?.path;
     const rootScheme = vscode.workspace.workspaceFolders?.[0].uri?.scheme;
-
+    
      const cwd = rootScheme === DVFS_SCHEME  ?
        process.cwd() :
-       rootPath || process.cwd();
+       vscode.workspace.rootPath || process.cwd();
 
     const clangd: vscodelc.Executable = {
       command: clangdPath,
