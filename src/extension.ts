@@ -8,25 +8,25 @@ import {getCompilationProfiles} from './references/compilation-profiles';
  *  activated the very first time a command is executed.
  */
 export async function activate(context: vscode.ExtensionContext) {
-  const outputChannel = vscode.window.createOutputChannel('clangd');
+  const outputChannel = vscode.window.createOutputChannel('sudu.clangd');
   context.subscriptions.push(outputChannel);
 
-  const clangdContext = new ClangdContext;
+  const clangdContext = new ClangdContext(context);
   context.subscriptions.push(clangdContext);
 
   // An empty place holder for the activate command, otherwise we'll get an
   // "command is not registered" error.
   context.subscriptions.push(
-      vscode.commands.registerCommand('clangd.activate', async () => {}));
+      vscode.commands.registerCommand('sudu.clangd.activate', async () => {}));
   context.subscriptions.push(
-      vscode.commands.registerCommand('clangd.restart', async () => {
+      vscode.commands.registerCommand('sudu.clangd.restart', async () => {
         await clangdContext.dispose();
         await clangdContext.activate(context.globalStoragePath, outputChannel);
       }));
 
   await clangdContext.activate(context.globalStoragePath, outputChannel);
 
-  const shouldCheck = vscode.workspace.getConfiguration('clangd').get(
+  const shouldCheck = vscode.workspace.getConfiguration('sudu.clangd').get(
       'detectExtensionConflicts');
 
   await getCompilationProfiles(context, clangdContext);
@@ -52,7 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
                       'intelliSenseEngine', 'disabled',
                       vscode.ConfigurationTarget.Global);
                 } else if (selection == 'Never show this warning') {
-                  vscode.workspace.getConfiguration('clangd').update(
+                  vscode.workspace.getConfiguration('sudu.clangd').update(
                       'detectExtensionConflicts', false,
                       vscode.ConfigurationTarget.Global);
                   clearInterval(interval);

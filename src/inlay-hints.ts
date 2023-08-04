@@ -54,7 +54,7 @@ class InlayHintsFeature implements vscodelc.StaticFeature {
         {clangdInlayHintsProvider?: boolean, inlayHintProvider?: any} =
         capabilities;
     vscode.commands.executeCommand(
-        'setContext', 'clangd.inlayHints.supported',
+        'setContext', 'sudu.clangd.inlayHints.supported',
         serverCapabilities.clangdInlayHintsProvider ||
             serverCapabilities.inlayHintProvider);
     if (!this.commandRegistered) {
@@ -66,7 +66,7 @@ class InlayHintsFeature implements vscodelc.StaticFeature {
       this.commandRegistered = true;
       const enabledSetting = 'editor.inlayHints.enabled';
       this.context.subscriptions.push(
-          vscode.commands.registerCommand('clangd.inlayHints.toggle', () => {
+          vscode.commands.registerCommand('sudu.clangd.inlayHints.toggle', () => {
             // This used to be a boolean, and then became a 4-state enum.
             var val = vscode.workspace.getConfiguration().get<boolean|string>(
                 enabledSetting, 'on');

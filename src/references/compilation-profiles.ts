@@ -70,7 +70,7 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
         if (currentProfile) {
           await clangdContext.client.sendNotification(
             DidChangeConfigurationNotification.type,
-            {settings: {compilationProfile: currentProfile}}
+            {settings: {}}
           );
         }
 
@@ -85,7 +85,7 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
           if (newProfile && newProfile.label !== extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY)) {
             await clangdContext.client.sendNotification(
               DidChangeConfigurationNotification.type,
-              {settings: {compilationProfile: newProfile.label}}
+              {settings: {}}
             );
 
             await extensionContext.workspaceState.update(COMPILATION_PROFILE_KEY, newProfile?.label);
