@@ -17,9 +17,9 @@ export async function activate(
 
   const ui = new UI(context, globalStoragePath);
   context.subscriptions.push(vscode.commands.registerCommand(
-      'clangd.install', async () => common.installLatest(ui)));
+      'sudu.clangd.install', async () => common.installLatest(ui)));
   context.subscriptions.push(vscode.commands.registerCommand(
-      'clangd.update', async () => common.checkUpdates(true, ui)));
+      'sudu.clangd.update', async () => common.checkUpdates(true, ui)));
   const status = await common.prepare(ui, config.get<boolean>('checkUpdates'));
   return status.clangdPath;
 }

@@ -1,6 +1,6 @@
 {
     "name": "sudu-vscode-clangd",
-    "displayName": "sudu-clangd",
+    "displayName": "sudu.clangd",
     "description": "C/C++ completion, navigation, and insights",
     "version": "0.1.23",
     "publisher": "llvm-vs-code-extensions",
@@ -28,9 +28,9 @@
         "onLanguage:cuda-cpp",
         "onLanguage:objective-c",
         "onLanguage:objective-cpp",
-        "onCommand:clangd.activate",
-        "onCommand:clangd.install",
-        "onCommand:clangd.update"
+        "onCommand:sudu.clangd.activate",
+        "onCommand:sudu.clangd.install",
+        "onCommand:sudu.clangd.update"
     ],
     "main": "./out/bundle",
     "scripts": {
@@ -73,7 +73,7 @@
         "untrustedWorkspaces": {
             "supported": "limited",
             "description": "In restricted mode clangd.path and clangd.arguments are not respected.",
-            "restrictedConfigurations": ["clangd.path", "clangd.arguments"]
+            "restrictedConfigurations": ["sudu.clangd.path", "sudu.clangd.arguments"]
         }
     },
     "contributes": {
@@ -91,13 +91,13 @@
             "type": "object",
             "title": "clangd",
             "properties": {
-                "clangd.path": {
+                "sudu.clangd.path": {
                     "type": "string",
                     "default": "clangd",
                     "scope": "machine-overridable",
                     "description": "The path to clangd executable, e.g.: /usr/bin/clangd."
                 },
-                "clangd.arguments": {
+                "sudu.clangd.arguments": {
                     "type": "array",
                     "default": [],
                     "items": {
@@ -105,17 +105,17 @@
                     },
                     "description": "Arguments for clangd server."
                 },
-                "clangd.trace": {
+                "sudu.clangd.trace": {
                     "type": "string",
                     "description": "Names a file that clangd should log a performance trace to, in chrome trace-viewer JSON format."
                 },
-                "clangd.semanticHighlighting": {
+                "sudu.clangd.semanticHighlighting": {
                     "type": "boolean",
                     "default": true,
                     "description": "Enable semantic highlighting in clangd.",
                     "deprecationMessage": "Legacy semanticHighlights is no longer supported. Please use `editor.semanticHighlighting.enabled` instead."
                 },
-                "clangd.fallbackFlags": {
+                "sudu.clangd.fallbackFlags": {
                     "type": "array",
                     "default": [],
                     "items": {
@@ -123,22 +123,22 @@
                     },
                     "description": "Extra clang flags used to parse files when no compilation database is found."
                 },
-                "clangd.serverCompletionRanking": {
+                "sudu.clangd.serverCompletionRanking": {
                     "type": "boolean",
                     "default": true,
                     "description": "Always rank completion items on the server as you type. This produces more accurate results at the cost of higher latency than client-side filtering."
                 },
-                "clangd.restartAfterCrash": {
+                "sudu.clangd.restartAfterCrash": {
                     "type": "boolean",
                     "default": true,
                     "description": "Auto restart clangd (up to 4 times) if it crashes."
                 },
-                "clangd.checkUpdates": {
+                "sudu.clangd.checkUpdates": {
                     "type": "boolean",
                     "default": false,
                     "description": "Check for language server updates on startup."
                 },
-                "clangd.onConfigChanged": {
+                "sudu.clangd.onConfigChanged": {
                     "type": "string",
                     "default": "prompt",
                     "description": "What to do when clangd configuration files are changed. Ignored for clangd 12+, which can reload such files itself.",
@@ -153,7 +153,7 @@
                         "Do nothing"
                     ]
                 },
-                "clangd.detectExtensionConflicts": {
+                "sudu.clangd.detectExtensionConflicts": {
                     "type": "boolean",
                     "default": true,
                     "description": "Warn about conflicting extensions and suggest disabling them."
@@ -162,96 +162,96 @@
         },
         "commands": [
             {
-                "command": "clangd.switchheadersource",
+                "command": "sudu.clangd.switchheadersource",
                 "category": "clangd",
                 "title": "Switch Between Source/Header"
             },
             {
-                "command": "clangd.install",
-                "category": "clangd",
+                "command": "sudu.clangd.install",
+                "category": "sudu.clangd",
                 "title": "Download language server"
             },
             {
-                "command": "clangd.update",
+                "command": "sudu.clangd.update",
                 "category": "clangd",
                 "title": "Check for language server update"
             },
             {
-                "command": "clangd.activate",
+                "command": "sudu.clangd.activate",
                 "category": "clangd",
                 "title": "Manually activate extension"
             },
             {
-                "command": "clangd.restart",
+                "command": "sudu.clangd.restart",
                 "category": "clangd",
                 "title": "Restart language server"
             },
             {
-                "command": "clangd.typeHierarchy",
+                "command": "sudu.clangd.typeHierarchy",
                 "category": "clangd",
                 "title": "Open Type Hierarchy"
             },
             {
-                "command": "clangd.typeHierarchy.viewParents",
+                "command": "sudu.clangd.typeHierarchy.viewParents",
                 "category": "clangd",
                 "title": "Types: Show Base Classes",
                 "icon": "$(triangle-up)"
             },
             {
-                "command": "clangd.typeHierarchy.viewChildren",
+                "command": "sudu.clangd.typeHierarchy.viewChildren",
                 "category": "clangd",
                 "title": "Types: Show Derived Classes",
                 "icon": "$(triangle-down)"
             },
             {
-                "command": "clangd.typeHierarchy.close",
+                "command": "sudu.clangd.typeHierarchy.close",
                 "category": "clangd",
                 "title": "Close",
                 "icon": "$(panel-close)"
             },
             {
-                "command": "clangd.memoryUsage",
+                "command": "sudu.clangd.memoryUsage",
                 "category": "clangd",
                 "title": "Show memory usage",
-                "enablement": "clangd.memoryUsage.supported",
+                "enablement": "sudu.clangd.memoryUsage.supported",
                 "icon": "$(refresh)"
             },
             {
-                "command": "clangd.memoryUsage.close",
+                "command": "sudu.clangd.memoryUsage.close",
                 "category": "clangd",
                 "title": "Close",
                 "icon": "$(panel-close)"
             },
             {
-                "command": "clangd.ast",
+                "command": "sudu.clangd.ast",
                 "category": "clangd",
                 "title": "Show AST",
-                "enablement": "clangd.ast.supported",
+                "enablement": "sudu.clangd.ast.supported",
                 "icon": "$(list-tree)"
             },
             {
-                "command": "clangd.ast.close",
+                "command": "sudu.clangd.ast.close",
                 "category": "clangd",
                 "title": "Close",
                 "icon": "$(panel-close)"
             },
             {
-                "command": "clangd.projectConfig",
+                "command": "sudu.clangd.projectConfig",
                 "category": "clangd",
                 "title": "Open project configuration file",
                 "icon": "$(gear)"
             },
             {
-                "command": "clangd.userConfig",
+                "command": "sudu.clangd.userConfig",
                 "category": "clangd",
                 "title": "Open user configuration file",
                 "icon": "$(gear)"
             },
             {
-                "command": "clangd.inlayHints.toggle",
+                "command": "sudu.clangd.inlayHints.toggle",
                 "category": "clangd",
                 "title": "Toggle inlay hints",
-                "enablement": "clangd.inlayHints.supported"
+                "enablement": "sudu.clangd.inlayHints.supported"
             },
             {
                 "command": "sudu.clangd.referencesInAllProfiles",
@@ -261,13 +261,13 @@
         ],
         "keybindings": [
             {
-                "command": "clangd.switchheadersource",
+                "command": "sudu.clangd.switchheadersource",
                 "key": "Alt+o",
                 "mac": "Alt+cmd+o",
                 "when": "editorTextFocus"
             },
             {
-                "command": "clangd.typeHierarchy",
+                "command": "sudu.clangd.typeHierarchy",
                 "key": "Shift+Alt+t",
                 "when": "editorTextFocus"
             }
@@ -275,19 +275,19 @@
         "menus": {
             "editor/context": [
                 {
-                    "command": "clangd.typeHierarchy",
+                    "command": "sudu.clangd.typeHierarchy",
                     "when": "resourceLangId == cpp && clangd.enableTypeHierarchy",
                     "group": "0_navigation@4",
                     "_comment": "see https://github.com/microsoft/vscode-references-view/blob/f63eaed9934ca5ecc8f3fb3ca096f38c6e5e181f/package.json#L162"
                 },
                 {
-                    "command": "clangd.switchheadersource",
+                    "command": "sudu.clangd.switchheadersource",
                     "when": "resourceLangId == c || resourceLangId == cpp || resourceLangId == cuda-cpp || resourceLangId == objective-c || resourceLangId == objective-cpp",
                     "group": "0_navigation@5"
                 },
                 {
-                    "command": "clangd.ast",
-                    "when": "clangd.ast.supported"
+                    "command": "sudu.clangd.ast",
+                    "when": "sudu.clangd.ast.supported"
                 },
                 {
                     "command": "sudu.clangd.referencesInAllProfiles",
@@ -297,48 +297,48 @@
             ],
             "view/title": [
                 {
-                    "command": "clangd.typeHierarchy.viewParents",
+                    "command": "sudu.clangd.typeHierarchy.viewParents",
                     "when": "view == clangd.typeHierarchyView",
                     "group": "navigation"
                 },
                 {
-                    "command": "clangd.typeHierarchy.viewChildren",
+                    "command": "sudu.clangd.typeHierarchy.viewChildren",
                     "when": "view == clangd.typeHierarchyView",
                     "group": "navigation"
                 },
                 {
-                    "command": "clangd.typeHierarchy.close",
+                    "command": "sudu.clangd.typeHierarchy.close",
                     "when": "view == clangd.typeHierarchyView",
                     "group": "navigation"
                 },
                 {
-                    "command": "clangd.memoryUsage.close",
+                    "command": "sudu.clangd.memoryUsage.close",
                     "when": "view == clangd.memoryUsage",
                     "group": "navigation"
                 },
                 {
-                    "command": "clangd.memoryUsage",
+                    "command": "sudu.clangd.memoryUsage",
                     "when": "view == clangd.memoryUsage",
                     "group": "navigation"
                 },
                 {
-                    "command": "clangd.ast.close",
+                    "command": "sudu.clangd.ast.close",
                     "when": "view == clangd.ast",
                     "group": "navigation"
                 }
             ],
             "commandPalette": [
                 {
-                    "command": "clangd.typeHierarchy.viewParents",
+                    "command": "sudu.clangd.typeHierarchy.viewParents",
                     "when": "resourceLangId == cpp"
                 },
                 {
-                    "command": "clangd.typeHierarchy.viewChildren",
+                    "command": "sudu.clangd.typeHierarchy.viewChildren",
                     "when": "resourceLangId == cpp"
                 },
                 {
-                    "command": "clangd.memoryUsage",
-                    "when": "clangd.memoryUsage.supported"
+                    "command": "sudu.clangd.memoryUsage",
+                    "when": "sudu.clangd.memoryUsage.supported"
                 }
             ]
         },
@@ -354,19 +354,19 @@
         "views": {
             "explorer": [
                 {
-                    "id": "clangd.typeHierarchyView",
+                    "id": "sudu.clangd.typeHierarchyView",
                     "name": "Type Hierarchy",
-                    "when": "clangd.typeHierarchyVisible"
+                    "when": "sudu.clangd.typeHierarchyVisible"
                 },
                 {
-                    "id": "clangd.memoryUsage",
+                    "id": "sudu.clangd.memoryUsage",
                     "name": "clangd Memory Usage",
-                    "when": "clangd.memoryUsage.hasData"
+                    "when": "sudu.clangd.memoryUsage.hasData"
                 },
                 {
-                    "id": "clangd.ast",
+                    "id": "sudu.clangd.ast",
                     "name": "AST",
-                    "when": "clangd.ast.hasData"
+                    "when": "sudu.clangd.ast.hasData"
                 }
             ],
             "references-in-profiles-view": [

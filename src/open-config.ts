@@ -51,7 +51,7 @@ async function openConfigFile(path: vscode.Uri) {
 export function activate(context: ClangdContext) {
   // Create a command to open the project root .clangd configuration file.
   context.subscriptions.push(
-      vscode.commands.registerCommand('clangd.projectConfig', () => {
+      vscode.commands.registerCommand('sudu.clangd.projectConfig', () => {
         if (vscode.workspace.workspaceFolders?.length) {
           const folder = vscode.workspace.workspaceFolders[0];
           openConfigFile(vscode.Uri.joinPath(folder.uri, '.clangd'))
@@ -61,7 +61,7 @@ export function activate(context: ClangdContext) {
       }));
 
   context.subscriptions.push(
-      vscode.commands.registerCommand('clangd.userConfig', () => {
+      vscode.commands.registerCommand('sudu.clangd.userConfig', () => {
         const file = getUserConfigFile();
         if (file) {
           openConfigFile(vscode.Uri.file(file));

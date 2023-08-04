@@ -11,15 +11,24 @@ import * as memoryUsage from './memory-usage';
 import * as openConfig from './open-config';
 import * as switchSourceHeader from './switch-source-header';
 import * as typeHierarchy from './type-hierarchy';
+import {
+  dvfsExtensionApi, getDVFSHostByWebHost, getWebHostByDvfsHost,
+  parseClangdUri,
+  parseDvfsUri,
+  RemoteRootContext,
+  SnapshotInfo,
+  URI_DELIMITER
+} from "./references/DVFSTypes";
+import {COMPILATION_PROFILE_KEY} from "./references/compilation-profiles";
 
 const DVFS_SCHEME = 'sudu';
 
 export const clangdDocumentSelector = [
-  {scheme: 'file', language: 'c'},
-  {scheme: 'file', language: 'cpp'},
-  {scheme: 'file', language: 'cuda-cpp'},
-  {scheme: 'file', language: 'objective-c'},
-  {scheme: 'file', language: 'objective-cpp'},
+  // {scheme: 'file', language: 'c'},
+  // {scheme: 'file', language: 'cpp'},
+  // {scheme: 'file', language: 'cuda-cpp'},
+  // {scheme: 'file', language: 'objective-c'},
+  // {scheme: 'file', language: 'objective-cpp'},
   {scheme: DVFS_SCHEME, language: 'c'},
   {scheme: DVFS_SCHEME, language: 'cpp'},
   {scheme: DVFS_SCHEME, language: 'cuda-cpp'},
@@ -41,10 +50,10 @@ class ClangdLanguageClient extends vscodelc.LanguageClient {
   // prompt up the failure to users.
 
   handleFailedRequest<T>(type: vscodelc.MessageSignature, error: any,
-                         token: vscode.CancellationToken|undefined,
+                         token: vscode.CancellationToken | undefined,
                          defaultValue: T): T {
     if (error instanceof vscodelc.ResponseError &&
-        type.method === 'workspace/executeCommand')
+      type.method === 'workspace/executeCommand')
       vscode.window.showErrorMessage(error.message);
 
     return super.handleFailedRequest(type, token, error, defaultValue);
@@ -52,19 +61,30 @@ class ClangdLanguageClient extends vscodelc.LanguageClient {
 }
 
 class EnableEditsNearCursorFeature implements vscodelc.StaticFeature {
-  initialize() {}
+  initialize() {
+  }
+
   fillClientCapabilities(capabilities: vscodelc.ClientCapabilities): void {
     const extendedCompletionCapabilities: any =
-        capabilities.textDocument?.completion;
+      capabilities.textDocument?.completion;
     extendedCompletionCapabilities.editsNearCursor = true;
   }
-  getState(): vscodelc.FeatureState { return {kind: 'static'}; }
-  dispose() {}
+
+  getState(): vscodelc.FeatureState {
+    return {kind: 'static'};
+  }
+
+  dispose() {
+  }
 }
 
 export class ClangdContext implements vscode.Disposable {
   subscriptions: vscode.Disposable[] = [];
   client!: ClangdLanguageClient;
+
+  constructor(private readonly extensionContext: vscode.ExtensionContext) {
+  }
+
 
   async activate(globalStoragePath: string,
                  outputChannel: vscode.OutputChannel) {
@@ -74,15 +94,15 @@ export class ClangdContext implements vscode.Disposable {
 
 
     const rootScheme = vscode.workspace.workspaceFolders?.[0].uri?.scheme;
-    
-     const cwd = rootScheme === DVFS_SCHEME  ?
-       process.cwd() :
-       vscode.workspace.rootPath || process.cwd();
+
+    const cwd = rootScheme === DVFS_SCHEME ?
+      process.cwd() :
+      vscode.workspace.rootPath || process.cwd();
 
     const clangd: vscodelc.Executable = {
       command: clangdPath,
       args: await config.get<string[]>('arguments'),
-      options: { cwd }
+      options: {cwd}
     };
     const traceFile = config.get<string>('trace');
     if (!!traceFile) {
@@ -125,9 +145,9 @@ export class ClangdContext implements vscode.Disposable {
           let items = (Array.isArray(list) ? list : list!.items).map(item => {
             // Gets the prefix used by VSCode when doing fuzzymatch.
             let prefix = document.getText(
-                new vscode.Range((item.range as vscode.Range).start, position))
+              new vscode.Range((item.range as vscode.Range).start, position))
             if (prefix)
-            item.filterText = prefix + '_' + item.filterText;
+              item.filterText = prefix + '_' + item.filterText;
             // Workaround for https://github.com/clangd/vscode-clangd/issues/357
             // clangd's used of commit-characters was well-intentioned, but
             // overall UX is poor. Due to vscode-languageclient bugs, we didn't
@@ -159,16 +179,77 @@ export class ClangdContext implements vscode.Disposable {
             }
             return symbol;
           })
+        }
+      },
+      uriConverters: {
+        code2Protocol: (value: vscode.Uri) => {
+          if (value.scheme !== DVFS_SCHEME) {
+            return value.toString();
+          }
+
+          const parsed = parseDvfsUri(value);
+          if (!parsed) throw new Error(`Failed to parse uri: ${value}`);
+
+          const root: RemoteRootContext | undefined = dvfsExtensionApi().resolveRoot(
+            parsed.remoteRootId,
+          );
+
+          if (!root) {
+            throw new Error(`Failed to resolve remote root id: ${parsed.remoteRootId}`);
+          }
+
+          let currentProfile = this.extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY);
+
+          return `${DVFS_SCHEME
+          }://${
+            getDVFSHostByWebHost(root.host)
+          }${URI_DELIMITER
+          }${root.rootId
+          }${URI_DELIMITER
+          }${root.revisionId
+          }${URI_DELIMITER
+          }${currentProfile
+          }${parsed.uri.path
+          }`;
+        },
+        protocol2Code: (value: string) => {
+          const uri = vscode.Uri.parse(value);
+          if (uri.scheme !== DVFS_SCHEME) {
+            return uri;
+          }
+
+          const info = parseClangdUri(value);
+          const remoteContext = dvfsExtensionApi().resolveRootBySnapshotInfo(<SnapshotInfo>{
+            rootId: info.rootId, host: getWebHostByDvfsHost(info.host), revision: info.revision,
+          }) as RemoteRootContext | undefined;
+
+          if (!remoteContext) {
+            throw new Error(`Incorrect DVFS uri: ${value}`);
+          }
+
+          // outputChannel.appendLine('URI: ' + vscode.Uri.from({
+          //   scheme: DVFS_SCHEME,
+          //   authority: getWebHostByDvfsHost(info.host),
+          //   path: `/${remoteContext.id}${info.path}`,
+          //   query: info.profileName
+          // }).toString());
+
+          return vscode.Uri.from({
+            scheme: DVFS_SCHEME,
+            authority: getWebHostByDvfsHost(info.host),
+            path: `/${remoteContext.id}${info.path}`,
+            query: info.profileName
+          });
         },
       },
     };
 
     this.client = new ClangdLanguageClient('Clang Language Server',
-                                           serverOptions, clientOptions);
+      serverOptions, clientOptions);
     this.client.clientOptions.errorHandler =
-        this.client.createDefaultErrorHandler(
-            // max restart count
-            config.get<boolean>('restartAfterCrash') ? /*default*/ 4 : 0);
+      this.client.createDefaultErrorHandler(
+        // max restart count
+        config.get<boolean>('restartAfterCrash') ? /*default*/ 4 : 0);
     this.client.registerFeature(new EnableEditsNearCursorFeature);
     typeHierarchy.activate(this);
     inlayHints.activate(this);
@@ -184,11 +265,13 @@ export class ClangdContext implements vscode.Disposable {
 
   get visibleClangdEditors(): vscode.TextEditor[] {
     return vscode.window.visibleTextEditors.filter(
-        (e) => isClangdDocument(e.document));
+      (e) => isClangdDocument(e.document));
   }
 
   dispose() {
-    this.subscriptions.forEach((d) => { d.dispose(); });
+    this.subscriptions.forEach((d) => {
+      d.dispose();
+    });
     if (this.client)
       this.client.stop();
     this.subscriptions = []

@@ -3,13 +3,13 @@ import * as vscode from 'vscode';
 
 // Gets the config value `clangd.<key>`. Applies ${variable} substitutions.
 export function get<T>(key: string): T {
-  return substitute(vscode.workspace.getConfiguration('clangd').get<T>(key)!);
+  return substitute(vscode.workspace.getConfiguration('sudu.clangd').get<T>(key)!);
 }
 
 // Sets the config value `clangd.<key>`. Does not apply substitutions.
 export function update<T>(key: string, value: T,
                           target?: vscode.ConfigurationTarget) {
-  return vscode.workspace.getConfiguration('clangd').update(key, value, target);
+  return vscode.workspace.getConfiguration('sudu.clangd').update(key, value, target);
 }
 
 // Traverse a JSON value, replacing placeholders in all strings.

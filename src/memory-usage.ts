@@ -52,18 +52,18 @@ class MemoryUsageFeature implements vscodelc.StaticFeature {
   constructor(private context: ClangdContext) {
     const adapter = new TreeAdapter();
     adapter.onDidChangeTreeData((e) => vscode.commands.executeCommand(
-                                    'setContext', 'clangd.memoryUsage.hasData',
+                                    'setContext', 'sudu.clangd.memoryUsage.hasData',
                                     adapter.root !== undefined));
     this.context.subscriptions.push(
-        vscode.window.registerTreeDataProvider('clangd.memoryUsage', adapter));
+        vscode.window.registerTreeDataProvider('sudu.clangd.memoryUsage', adapter));
     this.context.subscriptions.push(
-        vscode.commands.registerCommand('clangd.memoryUsage', async () => {
+        vscode.commands.registerCommand('sudu.clangd.memoryUsage', async () => {
           const usage =
               await this.context.client.sendRequest(MemoryUsageRequest, {});
           adapter.root = convert(usage, '<root>');
         }));
     this.context.subscriptions.push(vscode.commands.registerCommand(
-        'clangd.memoryUsage.close', () => adapter.root = undefined));
+        'sudu.clangd.memoryUsage.close', () => adapter.root = undefined));
   }
 
   fillClientCapabilities(capabilities: vscodelc.ClientCapabilities) {}
@@ -71,7 +71,7 @@ class MemoryUsageFeature implements vscodelc.StaticFeature {
 
   initialize(capabilities: vscodelc.ServerCapabilities,
              _documentSelector: vscodelc.DocumentSelector|undefined) {
-    vscode.commands.executeCommand('setContext', 'clangd.memoryUsage.supported',
+    vscode.commands.executeCommand('setContext', 'sudu.clangd.memoryUsage.supported',
                                    'memoryUsageProvider' in capabilities);
   }
   getState(): vscodelc.FeatureState { return {kind: 'static'}; }

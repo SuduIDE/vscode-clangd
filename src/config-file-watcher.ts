@@ -82,7 +82,7 @@ class ConfigFileWatcher implements vscode.Disposable {
 
     switch (config.get<string>('onConfigChanged')) {
     case 'restart':
-      vscode.commands.executeCommand('clangd.restart');
+      vscode.commands.executeCommand('sudu.clangd.restart');
       break;
     case 'ignore':
       break;
@@ -93,10 +93,10 @@ class ConfigFileWatcher implements vscode.Disposable {
               uri.fsPath}' has been changed. Do you want to restart it?`,
           'Yes', 'Yes, always', 'No, never')) {
       case 'Yes':
-        vscode.commands.executeCommand('clangd.restart');
+        vscode.commands.executeCommand('sudu.clangd.restart');
         break;
       case 'Yes, always':
-        vscode.commands.executeCommand('clangd.restart');
+        vscode.commands.executeCommand('sudu.clangd.restart');
         config.update<string>('onConfigChanged', 'restart',
                               vscode.ConfigurationTarget.Global);
         break;

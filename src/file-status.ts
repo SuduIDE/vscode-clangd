@@ -5,8 +5,8 @@ import {ClangdContext} from './clangd-context';
 
 export function activate(context: ClangdContext) {
   context.subscriptions.push(vscode.commands.registerCommand(
-      'clangd.openOutputPanel', () => context.client.outputChannel.show()));
-  const status = new FileStatus('clangd.openOutputPanel');
+      'sudu.clangd.openOutputPanel', () => context.client.outputChannel.show()));
+  const status = new FileStatus('sudu.clangd.openOutputPanel');
   context.subscriptions.push(vscode.Disposable.from(status));
   context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(
       () => { status.updateStatus(); }));
