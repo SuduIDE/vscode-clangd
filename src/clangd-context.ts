@@ -12,14 +12,14 @@ import * as openConfig from './open-config';
 import * as switchSourceHeader from './switch-source-header';
 import * as typeHierarchy from './type-hierarchy';
 import {
-  dvfsExtensionApi, getDVFSHostByWebHost, getWebHostByDvfsHost,
+  dvfsExtensionApi, getDVFSHostByWebHost, getSuduConfiguration, getWebHostByDvfsHost,
   parseClangdUri,
   parseDvfsUri,
   RemoteRootContext,
   SnapshotInfo,
   URI_DELIMITER
 } from "./references/DVFSTypes";
-import {COMPILATION_PROFILE_KEY} from "./references/compilation-profiles";
+import { COMPILATION_PROFILE_KEY } from "./references/compilation-profiles";
 
 const DVFS_SCHEME = 'sudu';
 
@@ -78,6 +78,29 @@ class EnableEditsNearCursorFeature implements vscodelc.StaticFeature {
   }
 }
 
+function getSuduWebHost(): string {
+  const folders = vscode.workspace.workspaceFolders;
+
+  const suduFolder = folders?.find(folder => folder.uri.scheme === DVFS_SCHEME);
+
+  if (!suduFolder) {
+    throw new Error('Cannot find Sudu folder');
+  }
+
+  const parsed = parseDvfsUri(suduFolder.uri);
+  if (!parsed) throw new Error(`Failed to parse uri: ${suduFolder.uri}`);
+
+  const root: RemoteRootContext | undefined = dvfsExtensionApi().resolveRoot(
+    parsed.remoteRootId,
+  );
+
+  if (!root) {
+    throw new Error(`Failed to resolve remote root id: ${parsed.remoteRootId}`);
+  }
+
+  return root.host;
+}
+
 export class ClangdContext implements vscode.Disposable {
   subscriptions: vscode.Disposable[] = [];
   client!: ClangdLanguageClient;
@@ -93,15 +116,19 @@ export class ClangdContext implements vscode.Disposable {
       return;
 
 
-    const rootScheme = vscode.workspace.workspaceFolders?.[0].uri?.scheme;
+    // const rootScheme = vscode.workspace.workspaceFolders?.[0].uri?.scheme;
+    //
+    // const cwd = rootScheme === DVFS_SCHEME ?
+    //   process.cwd() :
+    //   vscode.workspace.rootPath || process.cwd();
 
-    const cwd = rootScheme === DVFS_SCHEME ?
-      process.cwd() :
-      vscode.workspace.rootPath || process.cwd();
+    const cwd = process.cwd(); // Right now we only work for Sudu FS
+
+    const settings = getSuduConfiguration(getSuduWebHost());
 
     const clangd: vscodelc.Executable = {
       command: clangdPath,
-      args: await config.get<string[]>('arguments'),
+      args: settings,
       options: {cwd}
     };
     const traceFile = config.get<string>('trace');
