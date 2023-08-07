@@ -124,14 +124,14 @@ const CODE_MODEL_INDEX = '--background-index-db-address';
 const PROJECT_MODEL_INDEX = '--compile-commands-address';
 const DVFS_ADDRESS = '--distributed-file-system-address';
 
-export function getSuduConfiguration(webHost: string): string[] {
+export function getSuduConfiguration(): string[] {
   const settings = new Map(config.get<string[]>('arguments').map(setting => {
     const parts = setting.split('=');
     return [parts[0], parts[1]];
   }));
 
   const suduConfig = dvfsExtensionApi().getConfiguration() as Configuration;
-  const connectionSettings = suduConfig.connections.find(connection => connection.webEndpoint === webHost);
+  const connectionSettings = suduConfig.connections[0];
   if (connectionSettings) {
     if (connectionSettings.dvfsEndpoint) {
       settings.set(DVFS_ADDRESS, connectionSettings.dvfsEndpoint);

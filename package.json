@@ -23,14 +23,7 @@
         "LLVM"
     ],
     "activationEvents": [
-        "onLanguage:c",
-        "onLanguage:cpp",
-        "onLanguage:cuda-cpp",
-        "onLanguage:objective-c",
-        "onLanguage:objective-cpp",
-        "onCommand:sudu.clangd.activate",
-        "onCommand:sudu.clangd.install",
-        "onCommand:sudu.clangd.update"
+        "onFileSystem:sudu"
     ],
     "main": "./out/bundle",
     "scripts": {
@@ -77,16 +70,6 @@
         }
     },
     "contributes": {
-        "languages": [
-            {
-                "id": "cpp",
-                "filenamePatterns": [
-                    "**/include/c++/**",
-                    "**/MSVC/*/include/**"
-                ],
-                "firstLine": "^/[/*].*-\\*-\\s*C\\+\\+\\s*-\\*-.*"
-            }
-        ],
         "configuration": {
             "type": "object",
             "title": "clangd",

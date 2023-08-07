@@ -124,7 +124,7 @@ export class ClangdContext implements vscode.Disposable {
 
     const cwd = process.cwd(); // Right now we only work for Sudu FS
 
-    const settings = getSuduConfiguration(getSuduWebHost());
+    const settings = getSuduConfiguration();
 
     const clangd: vscodelc.Executable = {
       command: clangdPath,
