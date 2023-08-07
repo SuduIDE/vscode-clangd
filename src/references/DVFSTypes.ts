@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as config from "../config";
 
 export const DVFS_SCHEME = 'sudu';
 
@@ -117,4 +118,40 @@ export type Connection = {
 
 export interface Configuration {
   readonly connections: Connection[]
+}
+
+const CODE_MODEL_INDEX = '--background-index-db-address';
+const PROJECT_MODEL_INDEX = '--compile-commands-address';
+const DVFS_ADDRESS = '--distributed-file-system-address';
+
+export function getSuduConfiguration(webHost: string): string[] {
+  const settings = new Map(config.get<string[]>('arguments').map(setting => {
+    const parts = setting.split('=');
+    return [parts[0], parts[1]];
+  }));
+
+  const suduConfig = dvfsExtensionApi().getConfiguration() as Configuration;
+  const connectionSettings = suduConfig.connections.find(connection => connection.webEndpoint === webHost);
+  if (connectionSettings) {
+    if (connectionSettings.dvfsEndpoint) {
+      settings.set(DVFS_ADDRESS, connectionSettings.dvfsEndpoint);
+    }
+
+    if (connectionSettings.cppCodeModelEndpoint) {
+      settings.set(CODE_MODEL_INDEX, connectionSettings.cppCodeModelEndpoint);
+    }
+
+    if (connectionSettings.cppProjectModelEndpoint) {
+      settings.set(PROJECT_MODEL_INDEX, connectionSettings.cppProjectModelEndpoint);
+    }
+  }
+
+  const result: string[] = [];
+
+  settings.forEach( (value, key) => {
+    const setting = value ? `${key}=${value}` : key;
+    result.push(setting)
+  } );
+
+  return result;
 }
