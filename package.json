@@ -2,7 +2,7 @@
     "name": "sudu-vscode-clangd",
     "displayName": "sudu.clangd",
     "description": "C/C++ completion, navigation, and insights",
-    "version": "0.0.1-rc.0",
+    "version": "0.0.1-rc.1",
     "publisher": "llvm-vs-code-extensions",
     "license": "MIT",
     "homepage": "https://clangd.llvm.org/",
