@@ -12,3 +12,7 @@ jobs:
     - run: npm ci
     - run: npm test
     - run: npm run package
+    - uses: actions/upload-artifact@v3
+      with:
+        name: 'sudu-vscode-clangd.vsix'
+        path: '*.vsix'
