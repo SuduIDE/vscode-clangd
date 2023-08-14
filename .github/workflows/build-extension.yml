@@ -20,3 +20,4 @@ jobs:
       with:
         name: 'sudu-vscode-clangd'
         path: '*.vsix'
+        retention-days: 7
