@@ -8,11 +8,15 @@ jobs:
       run: |
         Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         echo "DISPLAY=:99" >> $GITHUB_ENV
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        cache: 'npm'
     - run: npm ci
     - run: npm test
     - run: npm run package
     - uses: actions/upload-artifact@v3
       with:
-        name: 'sudu-vscode-clangd.vsix'
+        name: 'sudu-vscode-clangd'
         path: '*.vsix'
