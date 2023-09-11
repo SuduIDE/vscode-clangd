@@ -14,6 +14,8 @@ import {
 } from 'vscode-languageclient';
 import {ClangdContext} from '../clangd-context';
 import {ReferencesTreeData} from "./references-tree-data";
+import {ClientStorage, dvfsExtensionApi, parseDvfsUri, RemoteRootContext} from "./DVFSTypes";
+import {readDataFromStorage, updateDataInStorage} from "./utils";
 
 export const COMPILATION_PROFILE_KEY = 'sudu-cpp-compilation-profile';
 
@@ -50,16 +52,39 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
 
     const configuration = JSON.parse(fileContentJson) as Configuration;
 
+    const parsed = parseDvfsUri(workspaceFolder);
+    if (!parsed) throw new Error(`Failed to parse uri: ${workspaceFolder}`);
+
+    const connectionContext: RemoteRootContext | undefined = dvfsExtensionApi().resolveRoot(
+      parsed.remoteRootId,
+    );
+
+    if (!connectionContext) {
+      throw new Error(`Failed to resolve remote root id: ${parsed.remoteRootId}`);
+    }
+
+    const storage = connectionContext.components.get<ClientStorage>(
+      dvfsExtensionApi().getDIKeys().ClientStorage,
+    );
+
     if (configuration) {
       const cppConfiguration =
         configuration.configurations.find(conf => conf.language === 'c++');
 
-      let currentProfile = extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY);
+      let currentProfile = readDataFromStorage<string>(
+        storage,
+        COMPILATION_PROFILE_KEY,
+        connectionContext.id,
+      );
 
       if (cppConfiguration) {
         if (!currentProfile) {
-          await extensionContext.workspaceState.update(
-            COMPILATION_PROFILE_KEY, cppConfiguration.defaultProfile);
+          await updateDataInStorage<string>(
+            storage,
+            COMPILATION_PROFILE_KEY,
+            parsed.remoteRootId,
+            cppConfiguration.defaultProfile
+          );
           currentProfile = cppConfiguration.defaultProfile;
         }
 
@@ -82,13 +107,13 @@ export async function getCompilationProfiles(extensionContext: ExtensionContext,
           const newProfile = await window.showQuickPick(
             options, {title: 'Choose new compilation profile'});
 
-          if (newProfile && newProfile.label !== extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY)) {
+          if (newProfile && newProfile.label !== readDataFromStorage<string>(storage, COMPILATION_PROFILE_KEY, parsed.remoteRootId)) {
             await clangdContext.client.sendNotification(
               DidChangeConfigurationNotification.type,
               {settings: {}}
             );
 
-            await extensionContext.workspaceState.update(COMPILATION_PROFILE_KEY, newProfile?.label);
+            await updateDataInStorage(storage, COMPILATION_PROFILE_KEY, parsed.remoteRootId, newProfile?.label);
             statusBarItem.text = `Compilation profile: ${newProfile?.label}`;
           }
         });

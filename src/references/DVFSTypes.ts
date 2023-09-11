@@ -9,7 +9,12 @@ export interface RemoteRootContext {
   readonly host: string
   readonly rootId: string
   revisionId: number,
-  readonly id: RemoteRootId
+  readonly id: RemoteRootId,
+  components: DIContainer
+}
+
+export interface DIContainer {
+  get<T>(key: string): T
 }
 
 export type SnapshotInfo = {
@@ -83,6 +88,12 @@ enum UriParts {
   ROOT = 1,
   REVISION = 2,
   PROFILE_AND_PATH = 3,
+}
+
+export interface ClientStorage {
+  updateData<T>(key: string, update: (oldValue: T | undefined) => (T | undefined)): Promise<void>;
+  clearData(key: string): Promise<void>
+  getData<T>(key: string): T | undefined;
 }
 
 export const URI_DELIMITER = '~';

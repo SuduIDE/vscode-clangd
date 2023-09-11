@@ -12,6 +12,7 @@ import * as openConfig from './open-config';
 import * as switchSourceHeader from './switch-source-header';
 import * as typeHierarchy from './type-hierarchy';
 import {
+  ClientStorage,
   dvfsExtensionApi, getDVFSHostByWebHost, getSuduConfiguration, getWebHostByDvfsHost,
   parseClangdUri,
   parseDvfsUri,
@@ -20,6 +21,7 @@ import {
   URI_DELIMITER
 } from "./references/DVFSTypes";
 import { COMPILATION_PROFILE_KEY } from "./references/compilation-profiles";
+import {readDataFromStorage} from "./references/utils";
 
 const DVFS_SCHEME = 'sudu';
 
@@ -225,7 +227,12 @@ export class ClangdContext implements vscode.Disposable {
             throw new Error(`Failed to resolve remote root id: ${parsed.remoteRootId}`);
           }
 
-          let currentProfile = this.extensionContext.workspaceState.get<string>(COMPILATION_PROFILE_KEY);
+          const storage = root.components.get<ClientStorage>(
+            dvfsExtensionApi().getDIKeys().ClientStorage,
+          );
+
+
+          let currentProfile = readDataFromStorage<string>(storage, COMPILATION_PROFILE_KEY, root.id);
 
           return `${DVFS_SCHEME
           }://${
@@ -250,22 +257,22 @@ export class ClangdContext implements vscode.Disposable {
             rootId: info.rootId, host: getWebHostByDvfsHost(info.host), revision: info.revision,
           }) as RemoteRootContext | undefined;
 
+
           if (!remoteContext) {
             throw new Error(`Incorrect DVFS uri: ${value}`);
           }
 
-          // outputChannel.appendLine('URI: ' + vscode.Uri.from({
-          //   scheme: DVFS_SCHEME,
-          //   authority: getWebHostByDvfsHost(info.host),
-          //   path: `/${remoteContext.id}${info.path}`,
-          //   query: info.profileName
-          // }).toString());
+          const storage = remoteContext.components.get<ClientStorage>(
+            dvfsExtensionApi().getDIKeys().ClientStorage,
+          );
+
+          const currentContext = readDataFromStorage<string>(storage, COMPILATION_PROFILE_KEY, remoteContext.id);
+          const context = info.profileName === currentContext ? '' : info.profileName;
 
           return vscode.Uri.from({
             scheme: DVFS_SCHEME,
-            authority: getWebHostByDvfsHost(info.host),
             path: `/${remoteContext.id}${info.path}`,
-            query: info.profileName
+            query: context
           });
         },
       },
